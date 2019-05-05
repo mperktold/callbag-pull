@@ -1,0 +1,27 @@
+{
+  "name": "callbag-pull",
+  "version": "1.0.0",
+  "description": "Callbag operator that pulls a source for a given number of times",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mperktold/callbag-pull.git"
+  },
+  "keywords": [
+    "callbag",
+    "pull",
+    "reactive"
+  ],
+  "author": "Matthias Perktold",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mperktold/callbag-pull/issues"
+  },
+  "homepage": "https://github.com/mperktold/callbag-pull#readme",
+  "devDependencies": {
+    "tape": "^4.10.1"
+  }
+}
