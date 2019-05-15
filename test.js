@@ -53,7 +53,7 @@ test('it acts as noop when given 0', t => {
     t.end();
 });
 
-test('it sinds the given number of additional pulls', t => {
+test('it sends the given number of additional pulls', t => {
     let pullsReceived = 0;
     let downData = [];
     let talkback = (t, d) => {};
@@ -81,6 +81,64 @@ test('it sinds the given number of additional pulls', t => {
     t.deepEqual(pullsReceived, 6, 'forwards all pulls and adds own');
     t.deepEqual(downData, [1, 2, 3, 4, 5], 'forwards all data items');
     t.ok(terminated, 'forwards downward termination');
+
+    t.end();
+});
+
+test('it stops when being terminated from upstream', t => {
+    let pullsReceived = 0;
+    
+    const inputSource = (start, sink) => {
+        if (start !== 0) return;
+        sink(0, (t, d) => {
+            if (t === 0) d(0, inputSource);
+            if (t === 1) {
+                pullsReceived++;
+                sink(2);
+            }
+        });
+    };
+    
+    pull(3)(inputSource)(0, (t, d) => {});
+    t.deepEqual(pullsReceived, 1, 'stops after being terminated');
+
+    t.end();
+});
+
+test('it stops when being terminated from downstream', t => {
+    let pullsReceived = 0;
+    
+    const inputSource = (start, sink) => {
+        if (start !== 0) return;
+        sink(0, (t, d) => {
+            if (t === 0) d(0, inputSource);
+            if (t === 1) sink(1, ++pullsReceived);
+        });
+    };
+    
+    pull(3)(inputSource)(0, (t, d) => {
+        if (t === 0) d(2);
+    });
+    t.deepEqual(pullsReceived, 0, 'stops after being terminated');
+
+    t.end();
+});
+
+test('it starts anew when output source is re-subscribed', t => {
+    let pullsReceived = 0;
+    
+    const inputSource = (start, sink) => {
+        if (start !== 0) return;
+        sink(0, (t, d) => {
+            if (t === 0) d(0, inputSource);
+            if (t === 1) sink(1, ++pullsReceived);
+        });
+    };
+    
+    const outputSource = pull(3)(inputSource);
+    outputSource(0, (t, d) => {});
+    outputSource(0, (t, d) => {});
+    t.deepEqual(pullsReceived, 6, 'pulls `n` times for each subscription');
 
     t.end();
 });
